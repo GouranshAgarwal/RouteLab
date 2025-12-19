@@ -1,4 +1,4 @@
-import { DijkstraStep } from "../algorithms/ts/types";
+import { DijkstraStep } from "../../../shared/types";
 
 class StepPlayer{ // plays the steps for animation in UI
 

@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    
+    "test": "ts-node-dev index.ts"
   },
+  
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -12,6 +14,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.2.1",
+    "nodemon": "^3.1.11",
     "pg": "^8.16.3",
     "prisma": "^7.1.0"
   },

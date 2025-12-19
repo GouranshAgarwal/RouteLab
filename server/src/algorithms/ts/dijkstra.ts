@@ -1,5 +1,5 @@
 import { AlgorithmResult, RoutingAlgorithm } from "../interface";
-import { AlgorithmInput, Graph, DistMap, ParentMap, NodeId, HeapNode, DijkstraStep } from "./types";
+import { AlgorithmInput, Graph, DistMap, ParentMap, NodeId, HeapNode, DijkstraStep } from "../../../../shared/types";
 
 
 class MinHeap{

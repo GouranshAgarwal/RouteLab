@@ -65,6 +65,14 @@ type DijkstraStep =
   | MarkVisitedStep
   | DoneStep;
 
+
+type NodePosition = {
+    x : number;
+    y : number;
+}
+
+type GraphLayout = Map<NodeId, NodePosition>;
+
 export {
     Edge, 
     Graph,
@@ -73,5 +81,7 @@ export {
     ParentMap,
     NodeId,
     HeapNode,
-    DijkstraStep
+    DijkstraStep,
+    NodePosition,
+    GraphLayout,
 };

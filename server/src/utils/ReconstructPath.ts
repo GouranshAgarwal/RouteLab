@@ -1,4 +1,4 @@
-import { NodeId, ParentMap } from "../algorithms/ts/types";
+import { NodeId, ParentMap } from "../../../shared/types";
 
 export function reconstructPath( // make the shortest path from source to target using parent map
     parents: ParentMap,
