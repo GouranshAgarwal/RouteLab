@@ -66,12 +66,7 @@ type DijkstraStep =
   | DoneStep;
 
 
-type NodePosition = {
-    x : number;
-    y : number;
-}
 
-type GraphLayout = Map<NodeId, NodePosition>;
 
 export {
     Edge, 
@@ -82,6 +77,4 @@ export {
     NodeId,
     HeapNode,
     DijkstraStep,
-    NodePosition,
-    GraphLayout,
 };

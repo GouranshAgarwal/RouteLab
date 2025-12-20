@@ -9,12 +9,12 @@ type UIState = {
     distances: Map<NodeId, number>;
 }
 
-function createInitialUIState(source:NodeId):UIState{
+function createInitialUIState():UIState{
     return {
         stepType:undefined,
         activeNode:undefined,
         activeEdge:undefined,
-        source,
+        source:undefined,
         visited: new Set(),
         distances: new Map(),
     }
@@ -32,6 +32,7 @@ function applyStep(prevState: UIState, step: DijkstraStep):UIState{
             return{
                 ...next,
                 distances:  new Map(step.distancesSnapshot),
+                source: step.source
             }
         case "PICK_NODE":
             return {
@@ -67,3 +68,4 @@ function applyStep(prevState: UIState, step: DijkstraStep):UIState{
 }
 
 export {createInitialUIState, applyStep}
+export type {UIState};
