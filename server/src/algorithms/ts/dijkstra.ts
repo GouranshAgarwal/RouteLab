@@ -111,15 +111,15 @@ class Dijkstra implements RoutingAlgorithm{
         // Dijkastra loop logic
         const minHeap = new MinHeap();
         minHeap.insert({nodeId: source, distance: 0});
+        let lastNode : NodeId | null = null;
 
         while(!minHeap.isEmpty()){
             const minNode = minHeap.extractMin();
             if(!minNode) break; // since extractMin is returning a null value too in empty cases (Typescript)
             const {nodeId, distance} = minNode;
 
-            if(visited.has(nodeId)) continue;
-
             const currDist = distances.get(nodeId);
+            if(visited.has(nodeId)) continue;
             if(currDist === undefined) continue;
             if(distance !== currDist)continue;
 
@@ -130,6 +130,7 @@ class Dijkstra implements RoutingAlgorithm{
             })
 
             visited.add(nodeId);
+            lastNode = nodeId;
             steps.push({
                 type:"MARK_VISITED",
                 node:nodeId
@@ -139,7 +140,11 @@ class Dijkstra implements RoutingAlgorithm{
             if(!edges) continue;
             // edges.forEach(edge=>{
             for(const edge of edges){
-
+                if(visited.has(edge.to))continue;
+                
+                const newDist = currDist + edge.weight;
+                const nxtDist = distances.get(edge.to);
+                if(nxtDist === undefined) continue;
                 steps.push({
                     type:"RELAX_EDGE",
                     from:nodeId,
@@ -147,10 +152,6 @@ class Dijkstra implements RoutingAlgorithm{
                     currentDistance:currDist,
                     edgeWeight:edge.weight
                 })
-
-                const newDist = currDist + edge.weight;
-                const nxtDist = distances.get(edge.to);
-                if(nxtDist === undefined) continue;
 
                 if( newDist < nxtDist){
                     distances.set(edge.to, newDist);
@@ -163,14 +164,13 @@ class Dijkstra implements RoutingAlgorithm{
                         to:edge.to,
                         oldDistance:nxtDist,
                         newDistance:newDist
-                    })
-
-                    
+                    })    
                 }
             }
         }
         steps.push({
-            type:"DONE"
+            type:"DONE" ,
+            lastNode: lastNode!
         })
         return {
             distances,

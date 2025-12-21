@@ -4,7 +4,7 @@ import type { GraphState } from "./graphState";
 type GraphAction =
   | { type: "ADD_NODE"; nodeId: NodeId }
   | { type: "REMOVE_NODE"; nodeId: NodeId }
-  | { type: "ADD_EDGE"; from: NodeId; to: NodeId; weight: number }
+  | { type: "ADD_EDGE"; from: NodeId; to: NodeId; weight: number, directed: boolean}
   | { type: "REMOVE_EDGE"; from: NodeId; to: NodeId };
 
 
@@ -45,15 +45,22 @@ function GraphReducer(
     case "ADD_EDGE": {
       const edges = new Map(prevState.edges);
 
-      const prevEdges = edges.get(action.from) ?? [];
-      const newEdges = [...prevEdges, { to: action.to, weight: action.weight }];
+      const addEdge = (from: NodeId, to: NodeId, weight: number) => {
+        const list = edges.get(from) ?? [];
 
-      edges.set(action.from, newEdges);
-
-      return {
-        ...prevState,
-        edges
+        const idx = list.findIndex(e => e.to === to);
+        if (idx >= 0) {
+          list[idx].weight = weight;
+        } else {
+          list.push({ to, weight });
+        }
       };
+
+      addEdge(action.from, action.to, action.weight);
+      if(!action.directed){
+        addEdge(action.to, action.from, action.weight);
+      }
+      return { ...prevState, edges };
     }
 
     case "REMOVE_EDGE": {

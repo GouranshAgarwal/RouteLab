@@ -55,6 +55,7 @@ type MarkVisitedStep = {
 
 type DoneStep = {
     type:"DONE";
+    lastNode: NodeId;
 }
 
 type DijkstraStep =

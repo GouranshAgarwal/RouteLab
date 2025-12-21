@@ -1,4 +1,4 @@
-import { DistMap, ParentMap, AlgorithmInput, DijkstraStep } from "../../../shared/types";
+import { DistMap, ParentMap, AlgorithmInput, DijkstraStep } from "./types";
 
 type AlgorithmResult = {
     distances: DistMap;

@@ -4,6 +4,7 @@ import type { NodeId } from '../../../shared/types'
 
 type NodeLayerProps = LayerProps & {
     selectedNode?: NodeId | null;
+    shortestPath?: NodeId[] | null;
     onNodeClick?: (nodeId: NodeId) => void;
 }
 
@@ -12,6 +13,7 @@ const NodeLayer : React.FC<NodeLayerProps> = ({
     layout,
     uiState,
     selectedNode,
+    shortestPath,
     onNodeClick
 }) => {
     const activeNode = uiState?.activeNode;
@@ -23,6 +25,8 @@ const NodeLayer : React.FC<NodeLayerProps> = ({
             const isActive = activeNode && activeNode === nodeId;
             const isVisited = uiState?.visited.has(nodeId);
             const isSelected = selectedNode === nodeId;
+            const isOnShortestPath = shortestPath?.includes(nodeId);
+
 
             return (
                 <g key={nodeId}>
@@ -35,7 +39,7 @@ const NodeLayer : React.FC<NodeLayerProps> = ({
                             ? "facc15"
                             :isVisited
                             ? "#6b7280"
-                            : isActive
+                            : (isActive || isOnShortestPath)
                             ? "#22d3ee"
                             : "#3b82f6"
                         }
