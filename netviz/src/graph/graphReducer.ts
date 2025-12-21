@@ -5,7 +5,8 @@ type GraphAction =
   | { type: "ADD_NODE"; nodeId: NodeId }
   | { type: "REMOVE_NODE"; nodeId: NodeId }
   | { type: "ADD_EDGE"; from: NodeId; to: NodeId; weight: number, directed: boolean}
-  | { type: "REMOVE_EDGE"; from: NodeId; to: NodeId };
+  | { type: "REMOVE_EDGE"; from: NodeId; to: NodeId }
+  | { type: "RESET_GRAPH"};
 
 
 function GraphReducer(
@@ -80,6 +81,13 @@ function GraphReducer(
         edges
       };
     }
+
+    case "RESET_GRAPH":
+      
+      return {
+        nodes: new Set(),
+        edges: new Map()
+      };
 
     default:
       return prevState;

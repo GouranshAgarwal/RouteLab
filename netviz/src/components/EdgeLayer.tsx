@@ -27,6 +27,7 @@ const EdgeLayer: React.FC<EdgeLayerProps> = ({
                 const textPosY = (fromPos.y + toPos.y) / 2 - 5;
                 
                 const isOnPath = shortestPath && shortestPath.findIndex(e=>e===from)+1 === shortestPath.findIndex(e=>e===edge.to);
+                const isNotOnPath = shortestPath && 1;
                 return (
                     <>
                     <line
@@ -35,14 +36,19 @@ const EdgeLayer: React.FC<EdgeLayerProps> = ({
                         x2={toPos.x}
                         y1={fromPos.y}
                         y2={toPos.y}
-                        stroke={(isActive || isOnPath) ? "#22d3ee" : "#6b7280"}
+                        stroke={(isActive || isOnPath) ? "#22d3ee" : isNotOnPath?"#ff4e5fff": "#6b7280"}
                         strokeWidth={(isActive || isOnPath) ? 4 : 2}
                     />
                     <text
                         x={textPosX}
                         y={textPosY}
                         textAnchor="middle" 
-                        fill="black"
+                        className="
+                            fill-gray-900 
+                            dark:fill-gray-100
+                            text-sm
+                            font-mono
+                        "
                         fontSize={12}
                     >
                         {edge.weight}

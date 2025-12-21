@@ -25,7 +25,9 @@ const NodeLayer : React.FC<NodeLayerProps> = ({
             const isActive = activeNode && activeNode === nodeId;
             const isVisited = uiState?.visited.has(nodeId);
             const isSelected = selectedNode === nodeId;
-            const isOnShortestPath = shortestPath?.includes(nodeId);
+            const isOnShortestPath = shortestPath && shortestPath.includes(nodeId);
+            const notOnShortestPath = shortestPath && !shortestPath.includes(nodeId);
+            console.log(shortestPath);
 
 
             return (
@@ -37,9 +39,13 @@ const NodeLayer : React.FC<NodeLayerProps> = ({
                         fill={
                             isSelected
                             ? "facc15"
+                            :isOnShortestPath
+                            ?"#1ca5baff"
+                            :notOnShortestPath
+                            ?"#ff9c9cff"
                             :isVisited
                             ? "#6b7280"
-                            : (isActive || isOnShortestPath)
+                            : isActive
                             ? "#22d3ee"
                             : "#3b82f6"
                         }
