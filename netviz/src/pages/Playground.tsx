@@ -1,15 +1,15 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useReducer, useState } from "react";
 import GraphCanvas from "../components/GraphCanvas";
 import { createCircularLayout } from "../graph/createCircularLayout";
 import type { GraphState } from "../graph/graphState";
 import { GraphReducer } from "../graph/graphReducer";
-import type { DijkstraStep, NodeId, ParentMap } from "../../../shared/types";
+import type { DistMap, NodeId, ParentMap } from "../../../shared/types";
 import { applyStep, createInitialUIState } from "../state/uiState";
 import {StepPlayer} from "../../../shared/StepPlayer"
 import { graphStateToGraph } from "../algorithms/graphConverter";
-import {Dijkstra} from "../../../shared/dijkstra"
 import { reconstructPath } from "../../../shared/ReconstructPath";
 import { Play, Pause, SkipBack, SkipForward, Plus, Trash2, Target, Sun, Moon, Zap, RotateCcw } from "lucide-react";
+import { runDijkstraAPI } from "../apis/runDijkstra";
 
 const initialGraphState : GraphState = {
     nodes : new Set(),
@@ -17,7 +17,7 @@ const initialGraphState : GraphState = {
 }
 
 const Playground: React.FC = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [graphState, dispatch] = useReducer(GraphReducer, initialGraphState);
   const [selectedNode, setSelectedNode] = useState<NodeId | null>(null);
   const [nodeCounter, setNodeCounter] = useState(0);
@@ -25,6 +25,7 @@ const Playground: React.FC = () => {
   const [stepPlayer, setStepPlayer] = useState<StepPlayer | null>(null);
   const [source, setSource] = useState<NodeId|null>(null);
   const [parents, setParents] = useState<ParentMap | null>(null);
+  // const [distances, setDistances] = useState<DistMap | null>(null);
   const [shortestPath, setShortestPath] = useState<NodeId[] | null>(null);
   const [isDirected, setIsDirected] = useState<boolean>(true);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -94,26 +95,39 @@ const Playground: React.FC = () => {
     setNodeCounter(prev => prev + 1);
   };
 
-  const handleAlgorithStart = ()=>{
+  const handleAlgorithStart = async()=>{
     if(!source){
         alert("Please select a source node.");
         return;
     }
     const graph = graphStateToGraph(graphState);
     const input = {graph, source}
-    const result = new Dijkstra().run(input);
-    const player = new StepPlayer(result.steps);
-    console.log(result);
-    setParents(result.parents);
-    setStepPlayer(player);
-    setUIState(createInitialUIState());
-    setShortestPath(null);
-    setIsPlaying(false);
+    // const result = new Dijkstra().run(input);
+    console.log("input: ",input);
+    try {
+      const result = await runDijkstraAPI(input);
+      const player = new StepPlayer(result.steps);
+      const initStep = player.current();
+
+      if (initStep?.type === "INIT") {
+        setUIState(prev => applyStep(prev, initStep));
+      }
+      console.log(result);
+      setParents(result.parents);
+      setStepPlayer(player);
+      // setUIState(createInitialUIState());
+      setShortestPath(null);
+      setIsPlaying(false);
+    } catch (error) {
+        console.error(error);
+        alert("Failed to run Dijkstra (check backend logs)");
+    }
+    
   }
 
-  const handlePlay = ()=>{
+  const handlePlay = useCallback(()=>{
     if (!stepPlayer) return;
-
+    console.log(stepPlayer.current());
     const step = stepPlayer.next();
     if (!step) {
       setIsPlaying(false);
@@ -122,7 +136,6 @@ const Playground: React.FC = () => {
 
     setUIState(prev => {
       const next = applyStep(prev, step);
-
       if (step.type === "DONE" && parents && source) {
         const path = reconstructPath(parents, source, step.lastNode);
         setShortestPath(path);
@@ -130,14 +143,18 @@ const Playground: React.FC = () => {
 
       return next;
     });
-  }
+  }, [stepPlayer, parents, source]);
 
   const handlePrev = ()=>{
     if(!stepPlayer)return;
     const step = stepPlayer.prev();
     if(!step)return;
-
-    setUIState(prev => applyStep(prev, step));
+    let state = createInitialUIState();
+    for (let i = 0; i <= stepPlayer["index"]; i++) {
+      const step = stepPlayer["steps"][i];
+      state = applyStep(state, step);
+    }
+    setUIState(state);
     setIsPlaying(false);
   }
   
@@ -251,6 +268,7 @@ const Playground: React.FC = () => {
   };
 
   const renderDistances = () => {
+    if(!uiState.distances)return;
     const entries = Array.from(uiState.distances.entries());
 
     if (entries.length === 0) return <p className="text-sm text-gray-500 dark:text-gray-400">No data yet</p>;
@@ -281,7 +299,7 @@ const Playground: React.FC = () => {
 
     return (
       <div className="space-y-1">
-        {Array.from(parents.entries()).map(([node, parent]) => (
+        {Array.from(parents).map(([node, parent]) => (
           <div key={node} className="flex items-center gap-2 text-sm py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <span className="font-mono font-semibold text-gray-900 dark:text-gray-100">{node}</span>
             <span className="text-gray-400 dark:text-gray-600">←</span>

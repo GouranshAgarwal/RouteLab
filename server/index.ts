@@ -1,15 +1,13 @@
-// import { Dijkstra } from "./src/algorithms/ts/index";
-// import { StepPlayer } from "../shared/StepPlayer";
-// import { reconstructPath } from "./src/utils/ReconstructPath";
-
-
-// const input = {graph, source};
-// const result = new Dijkstra().run(input);
-// const player = new StepPlayer(result.steps);
-// if(player.current()){
-//     console.log(player.current());
-// }
-// while(player.hasNext()){
-//     console.log(player.next());
-// }
-// console.log(reconstructPath(result.parents, source, "D"));
+import express from "express";
+import runAlgorithmRouter from "./routes/runAlgothims"
+import cors from "cors";
+const app = express();
+app.use(cors({
+    origin:"http://localhost:5173",
+    credentials:true
+}));
+app.use(express.json());
+app.use("/api/run", runAlgorithmRouter);
+app.listen(3001, ()=>{
+    console.log("Server is running on port 3001");
+})

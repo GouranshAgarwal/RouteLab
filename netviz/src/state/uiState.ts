@@ -29,9 +29,13 @@ function applyStep(prevState: UIState, step: DijkstraStep):UIState{
 
     switch (step.type) {
         case "INIT":
+            console.log("initial distances: ", step.distancesSnapshot);
             return{
                 ...next,
                 distances:  new Map(step.distancesSnapshot),
+                visited: new Set(),          
+                activeNode: undefined,
+                activeEdge: undefined,
                 source: step.source
             }
         case "PICK_NODE":
@@ -63,7 +67,11 @@ function applyStep(prevState: UIState, step: DijkstraStep):UIState{
             return next;
             
         default:
-            return next;
+            return {
+                ...next,
+                activeNode: undefined,
+                activeEdge: undefined
+            }
     }
 }
 
