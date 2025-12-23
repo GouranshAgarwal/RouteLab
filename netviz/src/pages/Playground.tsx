@@ -54,7 +54,7 @@ const Playground: React.FC = () => {
     const input = prompt("Enter edge weight", "1");
     const weight = Number(input);
 
-    if (!Number.isFinite(weight) || weight <= 0) {
+    if (!Number.isFinite(weight)) {
         alert("Please enter a valid positive number");
         return;
     }
@@ -108,7 +108,7 @@ const Playground: React.FC = () => {
       const result = await runDijkstraAPI(input);
       const player = new StepPlayer(result.steps);
       const initStep = player.current();
-
+      console.log("initStep: ", initStep);
       if (initStep?.type === "INIT") {
         setUIState(prev => applyStep(prev, initStep));
       }
@@ -156,6 +156,9 @@ const Playground: React.FC = () => {
     }
     setUIState(state);
     setIsPlaying(false);
+    if(step.type !== "DONE"){
+      setShortestPath(null);
+    }
   }
   
   const handleSelectSource = ()=>{
@@ -279,7 +282,7 @@ const Playground: React.FC = () => {
           <div key={node} className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <span className="font-mono font-semibold text-gray-900 dark:text-gray-100">{node}</span>
             <span className="font-mono text-gray-600 dark:text-gray-400">
-              {dist === Infinity ? "∞" : dist}
+              {dist === null ? "∞" : dist}
             </span>
             <span className={`px-2 py-0.5 rounded text-xs ${
               uiState.visited.has(node)

@@ -25,9 +25,25 @@ router.post("/dijkstra", (req, res) => {
 
     const result = new Dijkstra().run(input);
 
+    console.log("this is inside dijkstra router printing distances: ", result.steps[0] );
+
+    const serializeDistances = (map: Map<string, number>) =>
+      Object.fromEntries(
+        [...map].map(([k, v]) => [k, v === Infinity ? null : v])
+      );
+
+
+
+    const serializedSteps = result.steps.map(step => ({
+      ...step,
+      distancesSnapshot: step.type === "INIT"
+        ? serializeDistances(step.distancesSnapshot)
+        : undefined
+    }));
+
     // 🔥 Convert Maps → Objects for JSON
     res.json({
-      steps: result.steps,
+      steps: serializedSteps,
       parents: Object.fromEntries(result.parents),
       distances: Object.fromEntries(result.distances),
     });

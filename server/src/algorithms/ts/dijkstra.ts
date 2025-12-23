@@ -102,6 +102,8 @@ class Dijkstra implements RoutingAlgorithm{
         })
         distances.set(source, 0); // distance to source is 0
 
+        console.log("this is inside distance snapshot, printing frm dijkstra.ts: ", new Map(distances));
+
         steps.push({
             type:"INIT",
             source,

@@ -21,6 +21,8 @@ export async function runDijkstraAPI(
 
   const data = await res.json();
 
+  console.log("Data received from Dijkstra API at frontend: ", data);
+
   const steps = data.steps.map((step: any) => {
     if (step.type === "INIT") {
       return {
