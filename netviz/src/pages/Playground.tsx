@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import GraphCanvas from "../components/GraphCanvas";
-import { createCircularLayout } from "../graph/createCircularLayout";
+import { createCircularLayout, createPhyllotaxisLayout, createRadialDistanceLayout } from "../graph/createCircularLayout";
 import type { GraphState } from "../graph/graphState";
 import { GraphReducer } from "../graph/graphReducer";
 import type { DistMap, NodeId, ParentMap } from "../../../shared/types";
@@ -25,12 +25,14 @@ const Playground: React.FC = () => {
   const [stepPlayer, setStepPlayer] = useState<StepPlayer | null>(null);
   const [source, setSource] = useState<NodeId|null>(null);
   const [parents, setParents] = useState<ParentMap | null>(null);
-  // const [distances, setDistances] = useState<DistMap | null>(null);
+  const [target, setTarget] = useState<NodeId | null>(null)
   const [shortestPath, setShortestPath] = useState<NodeId[] | null>(null);
   const [isDirected, setIsDirected] = useState<boolean>(true);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [playTick, setPlayTick] = useState(0);
+  const [algoDone, setAlgoDone]= useState(false);
   
-  const layout = createCircularLayout(graphState.nodes);
+  const layout = createPhyllotaxisLayout(graphState.nodes);//createCircularLayout(graphState.nodes);
 
   useEffect(() => {
     if (darkMode) {
@@ -96,6 +98,7 @@ const Playground: React.FC = () => {
   };
 
   const handleAlgorithStart = async()=>{
+    setAlgoDone(false);
     if(!source){
         alert("Please select a source node.");
         return;
@@ -136,13 +139,20 @@ const Playground: React.FC = () => {
 
     setUIState(prev => {
       const next = applyStep(prev, step);
+      if(step.type === "DONE")setAlgoDone(true);
       if (step.type === "DONE" && parents && source) {
-        const path = reconstructPath(parents, source, step.lastNode);
+        if(!target){
+          alert("Please select a target node to comute the shortest path.");
+          return next;
+        }
+        const path = reconstructPath(parents, source, target);
         setShortestPath(path);
       }
-
       return next;
     });
+
+    setPlayTick(t => t + 1);
+
   }, [stepPlayer, parents, source]);
 
   const handlePrev = ()=>{
@@ -157,6 +167,7 @@ const Playground: React.FC = () => {
     setUIState(state);
     setIsPlaying(false);
     if(step.type !== "DONE"){
+      setAlgoDone(false);
       setShortestPath(null);
     }
   }
@@ -175,37 +186,60 @@ const Playground: React.FC = () => {
   };
 
   const handleReset = () => {
-  const confirmed = window.confirm(
-    "This will clear the entire graph and reset the algorithm. Continue?"
-  );
+    const confirmed = window.confirm(
+      "This will clear the entire graph and reset the algorithm. Continue?"
+    );
 
-  if (!confirmed) return;
+    if (!confirmed) return;
 
-  // Reset graph
-  dispatch({ type: "RESET_GRAPH" });
+    // Reset graph
+    dispatch({ type: "RESET_GRAPH" });
 
-  // Reset algorithm/UI state
-  setSelectedNode(null);
-  setSource(null);
-  setParents(null);
-  setShortestPath(null);
-  setStepPlayer(null);
-  setUIState(createInitialUIState());
-  setNodeCounter(0);
-  setIsPlaying(false);
-};
+    // Reset algorithm/UI state
+    setSelectedNode(null);
+    setSource(null);
+    setParents(null);
+    setShortestPath(null);
+    setStepPlayer(null);
+    setUIState(createInitialUIState());
+    setNodeCounter(0);
+    setAlgoDone(false);
+    setIsPlaying(false);
+  };
+
+  const handleSetTarget = ()=>{
+    if(selectedNode){
+      setTarget(selectedNode);
+      setSelectedNode(null);
+    }
+  }
+
+
 
 
   useEffect(() => {
-    if (isPlaying && stepPlayer?.hasNext()) {
-      const timer = setTimeout(() => {
-        handlePlay();
-      }, 1500);
-      return () => clearTimeout(timer);
-    } else {
+    if (!isPlaying) return;
+    if (!stepPlayer || !stepPlayer.hasNext()) {
       setIsPlaying(false);
+      return;
     }
-  }, [isPlaying, stepPlayer, handlePlay]);
+
+    const timer = setTimeout(() => {
+      handlePlay();
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [isPlaying, playTick]);
+
+  useEffect(() => {
+    if (!algoDone) return;
+    if (!parents || !source || !target) return;
+
+    const path = reconstructPath(parents, source, target);
+    setShortestPath(path);
+  }, [algoDone, parents, source, target]);
+
+
 
   const renderCurrentStep = () => {
     if(!stepPlayer) return <p className="text-sm text-gray-500 dark:text-gray-400">Run algorithm to see steps</p>;
@@ -364,6 +398,14 @@ const Playground: React.FC = () => {
           >
             <Target className="w-4 h-4" />
             Set Source
+          </button>
+          <button
+            onClick={handleSetTarget}
+            disabled={!selectedNode}
+            className="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded flex items-center gap-1.5 transition-colors"
+          >
+            <Target className="w-4 h-4" />
+            Set Target
           </button>
           
           <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-2"></div>
