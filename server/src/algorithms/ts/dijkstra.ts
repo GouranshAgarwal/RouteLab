@@ -1,5 +1,6 @@
-import { AlgorithmResult, RoutingAlgorithm } from "../interface";
+import { AlgorithmResult} from "../interface";
 import { AlgorithmInput, Graph, DistMap, ParentMap, NodeId, HeapNode, DijkstraStep } from "../../../../shared/types";
+import { DijkstraEngine } from "../../engines/DijkstraEngine";
 
 
 class MinHeap{
@@ -77,7 +78,7 @@ class MinHeap{
         return this.heap.length;
     }
 }
-class Dijkstra implements RoutingAlgorithm{
+class Dijkstra implements DijkstraEngine{
     // No constructor needed since we will be switching from TS to CPP, it is running statelessly now;
     run( input: AlgorithmInput) : AlgorithmResult{
         const {graph, source} = input;

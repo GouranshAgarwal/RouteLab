@@ -2,15 +2,16 @@ import { Router } from "express";
 import { Dijkstra } from "../src/algorithms/ts";
 import { AlgorithmInput, Graph } from "../../shared/types";
 import { AlgorithmResult } from "../src/algorithms/interface";
+import { getAlgorithmEngine } from "../src/engines/EngineRegistry";
 
 const router = Router();
 router.post("/dijkstra", (req, res) => {
   try {
     console.log("Received Dijkstra request with body:", req.body);
 
-    const { graph, source } = req.body;
+    const { algorithm, graph, source } = req.body;
 
-    if (!graph || !source) {
+    if (!algorithm || !graph || !source) {
       return res.status(400).json({ error: "Invalid input" });
     }
 
@@ -23,7 +24,9 @@ router.post("/dijkstra", (req, res) => {
       source,
     };
 
-    const result = new Dijkstra().run(input);
+    const engine = getAlgorithmEngine(algorithm)
+
+    const result = engine.run(input);//new Dijkstra().run(input);
 
     console.log("this is inside dijkstra router printing distances: ", result.steps[0] );
 

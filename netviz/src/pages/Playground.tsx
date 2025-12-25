@@ -4,7 +4,8 @@ import { createCircularLayout, createPhyllotaxisLayout, createRadialDistanceLayo
 import type { GraphState } from "../graph/graphState";
 import { GraphReducer } from "../graph/graphReducer";
 import type { DistMap, NodeId, ParentMap } from "../../../shared/types";
-import { applyStep, createInitialUIState } from "../state/uiState";
+import { createInitialUIState } from "../state/uiState";
+import { applyStep } from "../state/applyStep";
 import {StepPlayer} from "../../../shared/StepPlayer"
 import { graphStateToGraph } from "../algorithms/graphConverter";
 import { reconstructPath } from "../../../shared/ReconstructPath";

@@ -6,11 +6,11 @@ type AlgorithmResult = {
     steps: DijkstraStep[];
 }
 
-interface RoutingAlgorithm {
-    run(input: AlgorithmInput): AlgorithmResult;
-}
+// interface RoutingAlgorithm { // same as algorithm engin--to be deleted later
+//     run(input: AlgorithmInput): AlgorithmResult;
+// }
 
 export {
-    RoutingAlgorithm,
+    //RoutingAlgorithm,
     AlgorithmResult
 }
