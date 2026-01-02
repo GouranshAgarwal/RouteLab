@@ -5,6 +5,8 @@ export class RouterNode {
   neighbors: NodeId[];
   table: DistMap = new Map();
   inbox: Map<NodeId, DistMap> = new Map();
+  changed: boolean = false;
+  linkCost: Map<NodeId, number> = new Map();
 
   constructor(id: NodeId, neighbors: NodeId[]) {
     this.id = id;

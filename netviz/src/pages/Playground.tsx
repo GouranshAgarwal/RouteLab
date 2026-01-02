@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import GraphCanvas from "../components/GraphCanvas";
-import { createCircularLayout, createPhyllotaxisLayout, createRadialDistanceLayout } from "../graph/createCircularLayout";
+import { createPhyllotaxisLayout } from "../graph/createCircularLayout";
 import type { GraphState } from "../graph/graphState";
 import { GraphReducer } from "../graph/graphReducer";
-import type { DistMap, NodeId, ParentMap } from "../../../shared/types";
+import type { NodeId, ParentMap } from "../../../shared/types";
 import { createInitialUIState } from "../state/uiState";
 import { applyStep } from "../state/applyStep";
 import {StepPlayer} from "../../../shared/StepPlayer"
@@ -11,7 +11,8 @@ import { graphStateToGraph } from "../algorithms/graphConverter";
 import { reconstructPath } from "../../../shared/ReconstructPath";
 import { Play, Pause, SkipBack, SkipForward, Plus, Trash2, Target, Sun, Moon, Zap, RotateCcw } from "lucide-react";
 import { runDijkstraAPI } from "../apis/runDijkstra";
-
+import { applyProtocolStep } from "../state/reducers/protocolReducer";
+import {ProtocolStepPlayer} from "../../../shared/ProtocolStepPlayer"
 const initialGraphState : GraphState = {
     nodes : new Set(),
     edges: new Map(),
@@ -32,6 +33,8 @@ const Playground: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playTick, setPlayTick] = useState(0);
   const [algoDone, setAlgoDone]= useState(false);
+  const [protocolPlayer, setProtocolPlayer] = useState<ProtocolStepPlayer | null>(null);
+
   
   const layout = createPhyllotaxisLayout(graphState.nodes);//createCircularLayout(graphState.nodes);
 
@@ -214,6 +217,31 @@ const Playground: React.FC = () => {
       setSelectedNode(null);
     }
   }
+
+  const startProtocol = async () => {
+    const graph = graphStateToGraph(graphState);
+
+    const res = await fetch("/api/protocol/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ graph: Object.fromEntries(graph) })
+    });
+
+    const { sessionId } = await res.json();
+    setProtocolPlayer(new ProtocolStepPlayer(sessionId));
+  };
+
+  const playProtocolStep = async () => {
+    if (!protocolPlayer) return;
+
+    const step = await protocolPlayer.next();
+    if (!step) return;
+
+    setUIState(prev => applyProtocolStep(prev, step));
+  };
+
+
+
 
 
 
